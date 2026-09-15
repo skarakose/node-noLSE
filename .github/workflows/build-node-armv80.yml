@@ -1,0 +1,38 @@
+name: build-node-arm64-armv80-noLSE
+
+# arm64-darwin Node v24.20.0 via the official recipe (./configure --ninja &&
+# ninja, Release) with two changes: (1) ISA pinned to ARMv8.0 so no ARMv8.1 LSE
+# atomics are emitted (Apple A10 / iPad 6 needs this); (2) small-icu for a fast
+# offline build. (needs Xcode >= 16.1 / Apple LLVM >= 17), and its
+# verify step fails the job if any LSE or PAC instruction is found.
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    # macos-15 defaults to Xcode 16.x (Apple clang 16 / LLVM 17) which has the
+    # C++20 P0960 V8 needs. macos-14's default Xcode (15.x) is TOO OLD and fails
+    # exactly at value-type.h:701 -> do not use it here.
+    runs-on: macos-15
+    timeout-minutes: 120
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build (arm64-darwin, ARMv8.0, no LSE, small-icu)
+        run: |
+          chmod +x build-node-armv80.sh
+          bash build-node-armv80.sh
+
+      - name: Upload node binary + diagnostics
+        if: always()               # keep node + dist/lse_sites.txt even if the gate fails,
+        uses: actions/upload-artifact@v4   # so a failed run still yields evidence + binary.
+        with:
+          name: node-v24.20.0-arm64-darwin-armv80-noLSE
+          # dist/ = node + deps.txt (otool -L) + (on failure) lse_sites.txt.
+          path: dist
+          if-no-files-found: warn
