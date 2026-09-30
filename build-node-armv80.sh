@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Build Node.js v24.20.0 for arm64-darwin like the official recipe
+# Build Node.js v24.21.0 for arm64-darwin like the official recipe
 # (./configure --ninja && ninja, Release) with two deliberate changes:
 #   * ISA baseline ARMv8.0 so NO ARMv8.1 LSE atomics (and no v8.2+ FP16/DotProd,
 #     v8.4 JSCVT) are emitted -- required to run on an Apple A10 (iPad 6).
@@ -17,9 +17,9 @@
 
 set -euo pipefail
 
-VERSION="v24.20.0"
+VERSION="v24.21.0"
 TARBALL="node-${VERSION}.tar.xz"
-EXPECT_SHA="2732fc3f588dd335cd6779c06864f7cd424bb1b5ff9a1743059a66c54f9ca4a1"
+EXPECT_SHA="a6f54defb6fd7c84f41dba13d61e78e9b4e0961712cf61f29715c05f5ced94fc"
 CPU="apple-a10"                       # ARMv8.0 -> zero LSE (proved via probe)
 INTL="${INTL:-full-icu}"             # none | small-icu | full-icu | system-icu
 
